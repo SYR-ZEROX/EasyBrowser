@@ -39,11 +39,14 @@ jobs:
 
     - name: Build
       run: ./gradlew clean assembleDebug
+
+    - name: backup
+      run: tar -czf ./app.tar.gz ./app/build/*
       
     - name: Easy-Browser-2.7.0-apk
       uses: actions/upload-artifact@v4
       with:
         name: Easy-Browser-2.7.0-Debug
-        path: ./app/build/outputs/apk/debug/*.apk
+        path: ./app.tar.gz
 
     
