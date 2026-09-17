@@ -1,6 +1,8 @@
 name: Build
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
   
 permissions:
@@ -48,5 +50,3 @@ jobs:
       with:
         name: Easy-Browser-2.7.0-Debug
         path: ./app.tar.gz
-
-    
