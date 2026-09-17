@@ -52,13 +52,13 @@ public class RuntimeManager {
 
                     // ========== GOJ Dynamic Proxy & Fingerprint ==========
                     Profile activeProfile = ProfileManager.getActiveProfile(context);
-                    
+
                     if (activeProfile.proxy != null && !activeProfile.proxy.isEmpty()) {
                         String proxyUrl = "socks://" + activeProfile.proxy;
                         runtimeSettings.arguments(new String[]{proxyUrl});
                         Log.i("GOJ", "Proxy set: " + proxyUrl);
                     }
-                    
+
                     // Apply timezone and locale from profile
                     if (activeProfile.locale != null && !activeProfile.locale.isEmpty()) {
                         runtimeSettings.locales(new String[]{activeProfile.locale});
@@ -70,16 +70,16 @@ public class RuntimeManager {
                         runtime = GeckoRuntime.create(context, runtimeSettings.build());
                         BuiltInAdBlockerManager.apply(runtime, prefs);
                         DefaultExtensionInstaller.preinstallDefaults(runtime, prefs);
-                        
+
                         // ========== GOJ Spoofer Extension ==========
                         runtime.getWebExtensionController()
                             .ensureBuiltIn("resource://android/assets/goj_spoofer/", "goj@browser.com")
                             .accept(
                                 extension -> Log.i("GOJ", "Spoofer installed: " + extension.id),
-                                error -> Log.e("GOJ", "Spoofer error: " + error.message)
+                                error -> Log.e("GOJ", "Spoofer error: " + error.getMessage())
                             );
                         // ===========================================
-                        
+
                     } catch (Exception e) {
                         Log.e("RuntimeManager", "GeckoRuntime.create failed", e);
                         runtime = null;
