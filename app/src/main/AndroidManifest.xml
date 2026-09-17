@@ -37,13 +37,16 @@
         android:label="${appLabel}"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-       
-<meta-data android:name="org.mozilla.geckoview.WebRTC" android:value="false" />
-
-android:theme="@style/Theme.EasyBrowser"
+        android:theme="@style/Theme.EasyBrowser"
         android:largeHeap="true"
         android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="31">
+
+        <!-- ========== GOJ WebRTC Disable ========== -->
+        <meta-data
+            android:name="org.mozilla.geckoview.WebRTC"
+            android:value="false" />
+        <!-- ======================================= -->
 
         <!-- Main Activity -->
         <activity
@@ -67,18 +70,6 @@ android:theme="@style/Theme.EasyBrowser"
                 <!-- Handle all HTTPS URLs -->
                 <data android:scheme="https" />
             </intent-filter>
-
-            <!-- Optional: Specific domain with App Links verification -->
-            <!-- Only add this if you control a specific domain and want verified deep links -->
-            <!--
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https"
-                      android:host="yourdomain.com" />
-            </intent-filter>
-            -->
 
             <!-- Handle text sharing (URLs shared from other apps) -->
             <intent-filter>
@@ -170,13 +161,13 @@ android:theme="@style/Theme.EasyBrowser"
             android:exported="false"
             android:parentActivityName=".ui.activity.SettingsActivity" />
 
-        <!-- Reading List Activity (F11) -->
+        <!-- Reading List Activity -->
         <activity
             android:name=".ui.activity.ReadingListActivity"
             android:exported="false"
             android:parentActivityName=".ui.activity.BrowserActivity" />
 
-        <!-- User Styles Activity (F14) -->
+        <!-- User Styles Activity -->
         <activity
             android:name=".ui.activity.UserStylesActivity"
             android:exported="false"
