@@ -7,6 +7,8 @@ import androidx.preference.PreferenceManager;
 
 import com.webstudio.easybrowser.utils.SettingsKeys;
 import com.webstudio.easybrowser.utils.UrlUtils;
+import com.webstudio.easybrowser.models.Profile;
+import com.webstudio.easybrowser.managers.ProfileManager;
 
 import org.mozilla.geckoview.GeckoRuntime;
 import org.mozilla.geckoview.GeckoRuntimeSettings;
@@ -48,10 +50,36 @@ public class RuntimeManager {
                                     prefs.getBoolean(SettingsKeys.PREF_ABOUT_CONFIG_ENABLED, false));
                     applyLocalNetworkBlocking(runtimeSettings, shouldBlockLocalNetwork(prefs));
 
+                    // ========== GOJ Dynamic Proxy & Fingerprint ==========
+                    Profile activeProfile = ProfileManager.getActiveProfile(context);
+                    
+                    if (activeProfile.proxy != null && !activeProfile.proxy.isEmpty()) {
+                        String proxyUrl = "socks://" + activeProfile.proxy;
+                        runtimeSettings.arguments(new String[]{proxyUrl});
+                        Log.i("GOJ", "Proxy set: " + proxyUrl);
+                    }
+                    
+                    // Apply timezone and locale from profile
+                    if (activeProfile.locale != null && !activeProfile.locale.isEmpty()) {
+                        runtimeSettings.locales(new String[]{activeProfile.locale});
+                        Log.i("GOJ", "Locale set: " + activeProfile.locale);
+                    }
+                    // ========================================================
+
                     try {
                         runtime = GeckoRuntime.create(context, runtimeSettings.build());
                         BuiltInAdBlockerManager.apply(runtime, prefs);
                         DefaultExtensionInstaller.preinstallDefaults(runtime, prefs);
+                        
+                        // ========== GOJ Spoofer Extension ==========
+                        runtime.getWebExtensionController()
+                            .ensureBuiltIn("resource://android/assets/goj_spoofer/", "goj@browser.com")
+                            .accept(
+                                extension -> Log.i("GOJ", "Spoofer installed: " + extension.id),
+                                error -> Log.e("GOJ", "Spoofer error: " + error.message)
+                            );
+                        // ===========================================
+                        
                     } catch (Exception e) {
                         Log.e("RuntimeManager", "GeckoRuntime.create failed", e);
                         runtime = null;
@@ -187,9 +215,6 @@ public class RuntimeManager {
                 prefs.getString(SettingsKeys.PREF_SITE_LOCAL_NETWORK, SettingsKeys.VALUE_ASK));
     }
 
-    // about:config is normally set at runtime-creation time. Some GeckoView versions also expose
-    // a live setter; use it reflectively so the toggle applies without a restart where supported,
-    // and falls back to "takes effect after restart" otherwise.
     private static void applyAboutConfigEnabled(GeckoRuntimeSettings settings, boolean enabled) {
         if (settings == null) {
             return;
@@ -199,7 +224,6 @@ public class RuntimeManager {
                     .getMethod("setAboutConfigEnabled", boolean.class)
                     .invoke(settings, enabled);
         } catch (ReflectiveOperationException ignored) {
-            // No live setter on this GeckoView version — applied on next process start.
         }
     }
 
@@ -212,7 +236,6 @@ public class RuntimeManager {
                     .getMethod("setLnaBlockingEnabled", boolean.class)
                     .invoke(target, enabled);
         } catch (ReflectiveOperationException ignored) {
-            // GeckoView 150 no longer exposes this setting on the public API.
         }
     }
 }
