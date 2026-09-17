@@ -48,6 +48,7 @@ android {
         targetSdk = 37
         versionCode = 28
         versionName = "2.7.2"
+      manifestPlaceholders = [geckoviewWebRTC: "false"]
 
         // Required for GeckoView - must match the channel of the artifact below.
         manifestPlaceholders = [
